@@ -67,6 +67,25 @@ class PropertyAccessorTest extends TestCase
         $this->assertTrue($this->propertyAccessor->getValue($obj, 'loaded'));
     }
 
+    public function testPrefersPropertyOverMethodWithSameNameWithoutArgs()
+    {
+        $obj = new class {
+            public bool $setValid = false;
+
+            public function setValid(): void
+            {
+                $this->setValid = true;
+            }
+        };
+
+        $this->assertFalse($this->propertyAccessor->getValue($obj, 'setValid'));
+        $reflection = new \ReflectionClass($obj);
+        $this->assertFalse(
+            $reflection->getProperty('setValid')->getValue($obj),
+            'Value must not change on reading property value',
+        );
+    }
+
     public static function getPathsWithMissingProperty()
     {
         return [
